@@ -45,18 +45,29 @@ st.markdown("""
        ========================================= */
     /* 1. Force the drag-and-drop box to be dark */
     div[data-testid="stFileUploader"] section {
-        background-color: #131324 !important; 
-        border: 2px dashed rgba(255,255,255,0.3) !important;
+        background-color: #0a0610 !important; 
+        border: 2px dashed rgba(102, 126, 234, 0.6) !important;
         border-radius: 12px !important;
         padding: 20px !important;
     }
     
-    /* 2. Force all text inside the box (Drag & drop, limits) to be white */
+    /* 2. Force ALL text inside to be bright white */
     div[data-testid="stFileUploader"] section * {
+        color: #ffffff !important;
+        font-weight: 600 !important;
+    }
+    
+    /* 3. Target the specific text elements */
+    div[data-testid="stFileUploader"] section p {
         color: #ffffff !important;
     }
     
-    /* 3. Style the "Browse files" button inside the uploader */
+    /* 4. Make drag-and-drop text visible */
+    div[data-testid="stFileUploader"] section div {
+        color: #ffffff !important;
+    }
+    
+    /* 5. Style the "Browse files" button inside the uploader */
     div[data-testid="stFileUploader"] section button {
         background-color: rgba(255, 255, 255, 0.1) !important;
         border: 1px solid rgba(255, 255, 255, 0.3) !important;
@@ -70,7 +81,7 @@ st.markdown("""
         border-color: #ffffff !important;
     }
     
-    /* 4. Make the little upload cloud icon white */
+    /* 6. Make the little upload cloud icon white */
     div[data-testid="stFileUploader"] section svg {
         fill: #ffffff !important;
     }
@@ -168,23 +179,27 @@ if analyze:
 
             resume_text = extract_text_from_pdf(uploaded_file)
 
-            if not resume_text or resume_text.strip() == "":
-                st.error("❌ Could not extract text. Please upload a text-based PDF.")
+            # SAFETY CHECK 1: Did we extract anything at all?
+            if not resume_text or len(resume_text.strip()) < 10:
+                st.error("❌ Could not read the text in this PDF. Please ensure it is a text-based PDF and not an image or a scanned document.")
                 st.stop()
 
             if "Error" in str(resume_text):
                 st.error(f"❌ {resume_text}")
                 st.stop()
 
+            # --- NEW FEATURE: Let the user see what the AI read ---
+            with st.expander("👀 View what the AI extracted from your Resume (Debug)"):
+                st.text("If this text looks like gibberish or is empty, the PDF encoding is broken.\n\n" + resume_text[:1500] + "...")
+
             # Calculate
             match_score = calculate_match_score(resume_text, job_description)
             missing_kw  = get_missing_keywords(resume_text, job_description)
             matching_kw = get_matching_keywords(resume_text, job_description)
 
-            try:
-                match_score = round(float(max(0, min(match_score, 100))), 1)
-            except:
-                match_score = 0.0
+            # SAFETY CHECK 2: If score is 0.0%, explain why
+            if match_score == 0.0:
+                st.warning("⚠️ Your score is 0.0%. This usually means your PDF has strict formatting that hides the text, OR your resume shares zero keywords with the Job Description. Check the 'View what the AI extracted' box above.")
 
             # ===================== SCORE DISPLAY =====================
             st.markdown("<br>", unsafe_allow_html=True)
@@ -192,7 +207,6 @@ if analyze:
             _, score_col, _ = st.columns([1, 2, 1])
             with score_col:
 
-                # Label
                 st.markdown(
                     "<h3 style='text-align:center; color:rgba(255,255,255,0.7); "
                     "letter-spacing:2px; font-weight:500; "
@@ -201,7 +215,6 @@ if analyze:
                     unsafe_allow_html=True
                 )
 
-                # Big score number
                 if match_score >= 80:
                     color = "#38ef7d"
                     emoji = "🏆"
@@ -243,7 +256,7 @@ if analyze:
             kw1, kw2 = st.columns(2, gap="large")
 
             with kw1:
-                st.subheader(f"✅ Matching Keywords — {len(matching_kw)} found")
+                st.subheader(f"✅ Matching Keywords ({len(matching_kw)})")
                 if matching_kw:
                     for kw in matching_kw:
                         st.success(f"✓  {kw}")
@@ -251,7 +264,7 @@ if analyze:
                     st.caption("No matching keywords found.")
 
             with kw2:
-                st.subheader(f"❌ Missing Keywords — {len(missing_kw)} missing")
+                st.subheader(f"❌ Missing Keywords ({len(missing_kw)})")
                 if missing_kw:
                     for kw in missing_kw:
                         st.error(f"✗  {kw}")
