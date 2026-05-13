@@ -8,11 +8,11 @@ st.set_page_config(
     layout="wide"
 )
 
-# ===================== FIXED CSS =====================
+# ===================== AGGRESSIVE CSS FIX =====================
 st.markdown("""
 <style>
     /* Main Background */
-    .stApp { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); }
+    .stApp { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e) !important; }
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
@@ -41,49 +41,53 @@ st.markdown("""
     }
     
     /* =========================================
-       FIX: FILE UPLOADER VISIBILITY
+       AGGRESSIVE FILE UPLOADER FIX
        ========================================= */
-    /* 1. Force the drag-and-drop box to be dark */
-    div[data-testid="stFileUploader"] section {
-        background-color: #0a0610 !important; 
-        border: 2px dashed rgba(102, 126, 234, 0.6) !important;
+    /* Target the entire uploader container */
+    [data-testid="stFileUploader"] {
+        background-color: #0a0610 !important;
+    }
+    
+    /* Target the section inside */
+    [data-testid="stFileUploader"] section {
+        background-color: #0a0610 !important;
+        border: 2px dashed #667eea !important;
         border-radius: 12px !important;
-        padding: 20px !important;
+        padding: 40px 20px !important;
     }
     
-    /* 2. Force ALL text inside to be bright white */
-    div[data-testid="stFileUploader"] section * {
+    /* Make ALL text white and visible */
+    [data-testid="stFileUploader"] section * {
         color: #ffffff !important;
-        font-weight: 600 !important;
+        font-weight: 700 !important;
+        text-shadow: 0 0 2px rgba(0,0,0,0.8) !important;
     }
     
-    /* 3. Target the specific text elements */
-    div[data-testid="stFileUploader"] section p {
-        color: #ffffff !important;
-    }
-    
-    /* 4. Make drag-and-drop text visible */
-    div[data-testid="stFileUploader"] section div {
+    /* Specific text elements */
+    [data-testid="stFileUploader"] section p,
+    [data-testid="stFileUploader"] section span,
+    [data-testid="stFileUploader"] section div {
         color: #ffffff !important;
     }
     
-    /* 5. Style the "Browse files" button inside the uploader */
-    div[data-testid="stFileUploader"] section button {
-        background-color: rgba(255, 255, 255, 0.1) !important;
-        border: 1px solid rgba(255, 255, 255, 0.3) !important;
-        border-radius: 8px !important;
-        color: #ffffff !important;
+    /* Browse button */
+    [data-testid="stFileUploader"] section button {
+        background-color: #667eea !important;
+        border: 2px solid #667eea !important;
+        color: white !important;
         font-weight: bold !important;
-        padding: 5px 15px !important;
-    }
-    div[data-testid="stFileUploader"] section button:hover {
-        background-color: rgba(255, 255, 255, 0.25) !important;
-        border-color: #ffffff !important;
+        border-radius: 8px !important;
+        padding: 10px 20px !important;
     }
     
-    /* 6. Make the little upload cloud icon white */
-    div[data-testid="stFileUploader"] section svg {
-        fill: #ffffff !important;
+    [data-testid="stFileUploader"] section button:hover {
+        background-color: #764ba2 !important;
+        border-color: #764ba2 !important;
+    }
+    
+    /* Icons */
+    [data-testid="stFileUploader"] svg {
+        filter: invert(1) !important;
     }
     /* ========================================= */
     
@@ -122,6 +126,23 @@ st.markdown("""
     
     .stCheckbox label { color: white !important; }
     hr { border-color: rgba(255,255,255,0.12) !important; }
+    
+    /* Expander styling */
+    [data-testid="stExpander"] {
+        background-color: #131324 !important;
+        border: 1px solid rgba(255,255,255,0.15) !important;
+        border-radius: 8px !important;
+    }
+    [data-testid="stExpander"] summary {
+        color: white !important;
+    }
+    
+    /* Warning/Error boxes */
+    .stWarning, .stError, .stSuccess, .stInfo {
+        background-color: #131324 !important;
+        border-radius: 8px !important;
+    }
+    
 </style>
 """, unsafe_allow_html=True)
 
@@ -149,7 +170,7 @@ col1, col2 = st.columns(2, gap="large")
 with col1:
     st.subheader("📄 Upload Your Resume")
     st.caption("PDF format only • Max 10MB")
-    uploaded_file = st.file_uploader("PDF", type=["pdf"], label_visibility="collapsed")
+    uploaded_file = st.file_uploader("Choose a PDF file", type=["pdf"], label_visibility="collapsed")
 
 with col2:
     st.subheader("💼 Paste Job Description")
